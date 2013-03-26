@@ -1,0 +1,7 @@
+*.bak
+*.pyc
+*.swp
+nltk_data
+log/*.log
+log/*.log.*
+.bash_history

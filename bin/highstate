@@ -1,0 +1,4 @@
+LOG=/srv/salt/log/$1.highstate.log
+echo Begin highstate `date` >> $LOG
+sudo salt $1 state.highstate 2>&1 >> $LOG
+echo End highstate `date` >> $LOG
