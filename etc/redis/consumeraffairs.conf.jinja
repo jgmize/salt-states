@@ -1,0 +1,16 @@
+{%- set redis = pillar.get('redis') %}
+{%- if redis %}
+{%- set master = redis.get('master', {}).get(grains['fqdn']) %}
+{%- set password = redis.get('password') %}
+
+{%- if master %}
+slaveof {{ grains['redis-master'] }} 6379
+{%- if password %}
+masterauth {{password}}
+{%- endif %}{#- end password #}
+{%- endif %}{#- end master #}
+
+{%- if password %}
+requirepass {{password}}
+{% endif %}{#- end password #}
+{% endif %}{#- end redis #}
