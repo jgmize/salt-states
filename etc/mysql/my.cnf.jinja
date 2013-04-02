@@ -1,0 +1,85 @@
+#   Performance recomendations from  pt-variable-advisor
+#   Some changes require reloading from backup, creating new master
+
+[mysqld_safe]
+nice = 0
+
+[mysqld]
+server-id = {{ grains['server_id'] }}
+user = mysql
+pid-file = /var/run/mysqld/mysqld.pid
+socket = /var/run/mysqld/mysqld.sock
+basedir = /usr
+datadir = /var/lib/mysql
+lc-messages-dir = /usr/share/mysql
+bind-address = 0.0.0.0
+
+default-storage-engine = INNODB
+character-set-server=utf8
+collation-server=utf8_general_ci
+
+slow_query_log = 1
+slow_query_log_file = /var/log/mysql/mysql-slow.log
+long_query_time = 1
+
+log_bin = /var/log/mysql/mysql-bin.log
+expire_logs_days = 10
+
+{% if not 'dev' in grains['fqdn'] %}
+#   InnoDB sizes
+innodb_buffer_pool_size = 6GB
+innodb_buffer_pool_instances = 6
+#   Changing this from default will require rebuilding log files
+#   http://www.mysqlperformanceblog.com/2011/07/09/how-to-change-innodb_log_file_size-safely/
+#innodb_log_file_size = 1GB
+{% endif %}
+
+#   This will require reloading the database, switching master,
+#   but will keep ibdata1 from growing without bounds
+#innodb_file_per_table = ON # ON is invalid
+
+#
+#   Recommended by pt-variable-advisor
+#
+#   Flush key buffers between MyISAM writes.  Default ON
+delay_key_write = OFF
+#   Log unusual events like aborted connections.  Default 1 doesn't.
+log_warnings = 2
+#   After this many interrupted connections, the host is placed on a blacklist.  Default 10
+max_connect_errors = 10000
+#   Timeout before slave thinks master connect has failed.  Default 3600
+slave_net_timeout = 60
+#   If storage is reliable, O_DIRECT may be faster than fsync() default
+innodb_flush_method = O_DIRECT
+#   Sync the binlog after each commit
+sync_binlog = 1
+
+#
+#   Optional stuff in existing config - should try disabling
+#
+
+#   Maximum size of packet or string, sets max BLOB size. Default 1M 
+#   Maybe can disable, but should sync with mysqldump?
+max_allowed_packet = 16M
+
+#   Number of threads to retain for reuse.  Default 0
+thread_cache_size = 8
+
+#   When recovering, save backup of MyISAM tables to from .MYD to .BAK. Default OFF
+myisam-recover-options = BACKUP
+
+#   Memory allocated to caching query results.  Default 0
+query_cache_size = 16M
+
+[mysqldump]
+quick
+quote-names
+#   Maximum size of packet or string, sets max BLOB size. Default 1M 
+max_allowed_packet = 16M
+
+[mysql]
+
+[isamchk]
+key_buffer = 16M
+
+!includedir /etc/mysql/conf.d/
