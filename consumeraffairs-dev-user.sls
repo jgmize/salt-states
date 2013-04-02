@@ -2,11 +2,13 @@
 # Context from users.sls
 # username: {{username}}
 # home: {{home}}
-{% set roles = grains.get('roles', []) %}
-{% if 'dev' in roles %}
 
+{% if username in grains.get('consumeraffairs_dev_users', []) %}
 include:
     - python
+    - vcs
+    - consumeraffairs_deps
+    - brunch
 
 mkvirtualenv_{{username}}:
     cmd:
@@ -15,13 +17,10 @@ mkvirtualenv_{{username}}:
         - name: 'su - {{username}} -c "bash -l -i -c \"mkvirtualenv ca -a {{home}}/consumeraffairs\""'
         - unless: test -d {{home}}/.virtualenvs/ca
         - require:
-            - pkg: virtualenvwrapper
             - user: {{username}}
             - cmd: clone_consumeraffairs_{{username}}
 
 pip_install_yaml_{{username}}:
-    pkg.installed:
-        - name: libyaml-dev
     cmd:
         - run
         - user: {{username}}
@@ -30,9 +29,6 @@ pip_install_yaml_{{username}}:
         - name: '{{home}}/.virtualenvs/ca/bin/pip install PyYAML'
         - unless: test -d {{home}}/.virtualenvs/ca/lib/python2.7/site-packages/yaml
         - require:
-            - pkg: libyaml-dev
-            - pkg: build-essential
-            - pkg: python-dev
             - cmd: mkvirtualenv_{{username}}
 
 pip_install_PIL_{{username}}:
@@ -44,12 +40,6 @@ pip_install_PIL_{{username}}:
         - name: '{{home}}/.virtualenvs/ca/bin/pip install PIL'
         - unless: test -d {{home}}/.virtualenvs/ca/lib/python2.7/site-packages/PIL
         - require:
-            - pkg: PIL_dependencies
-            - pkg: build-essential
-            - pkg: python-dev
-            - file: /usr/lib/libfreetype.so
-            - file: /usr/lib/libjpeg.so
-            - file: /usr/lib/libz.so
             - cmd: mkvirtualenv_{{username}}
        
 clone_consumeraffairs_{{username}}:
@@ -57,13 +47,11 @@ clone_consumeraffairs_{{username}}:
         - run
         - user: {{username}}
         - shell: /bin/bash
-        - name: '/usr/bin/hg clone /var/www/consumeraffairs'
+        - name: "/usr/bin/hg clone {{pillar.get('consumeraffairs_repo')}}"
         - cwd: {{home}}
         - unless: test -d {{home}}/consumeraffairs
         - require:
             - user: {{username}}
-            - pkg: mercurial
-            - cmd: clone_consumeraffairs
 
 pip_install_requirements_{{username}}:
     cmd:
@@ -77,12 +65,10 @@ pip_install_requirements_{{username}}:
             - cmd: clone_consumeraffairs_{{username}}
             - cmd: pip_install_PIL_{{username}}
             - cmd: pip_install_yaml_{{username}}
-            - pkg: libmysqlclient-dev
-            - pkg: libenchant-dev
 
 {{home}}/consumeraffairs/local_settings.py:
     file.managed:
-        - source: salt:/{{home}}/consumeraffairs/local_settings.py.jinja
+        - source: salt://consumeraffairs/local_settings.py.jinja
         - template: jinja
         - user: {{username}}
         - group: {{username}}
@@ -90,6 +76,7 @@ pip_install_requirements_{{username}}:
         - require:
             - cmd: clone_consumeraffairs_{{username}}
 
+{% if 'dev' in grains.get('roles', []) %}
 pip_install_requirements_dev_{{username}}:
     cmd:
         - run
@@ -100,6 +87,7 @@ pip_install_requirements_dev_{{username}}:
         - unless: test -e {{home}}/.virtualenvs/ca/bin/pep8
         - require:
             - cmd: pip_install_requirements_{{username}}
+{% endif %}
 
 {{username}}_nltk_tokenizers_punkt:
     pkg.installed:
@@ -119,5 +107,12 @@ pip_install_requirements_dev_{{username}}:
         - require:
             - file.managed: {{home}}/nltk_data/tokenizers/punkt.zip
             - pkg.installed: unzip
+
+install_frontend_dependencies:
+    cmd.run:
+        - name: 'npm install'
+        - cwd: {{home}}/consumeraffairs/styleguide/frontend
+        - unless: test -d {{home}}/consumeraffairs/styleguide/frontend/node_modules
+        - runas: {{username}}
+
 {% endif %}
-# vim:set ft=yaml:
