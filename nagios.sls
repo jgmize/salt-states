@@ -25,12 +25,20 @@ nagios_prereqs:
             - build-essential       # For buildiing check_mysql_health
             - libredis-perl         # For talking to Redis
 
-/usr/local/bin/build_check_mysql_health:
+{% set nagios_bin_files = [
+    '/usr/local/bin/build_check_mysql_health',  
+    '/usr/local/bin/check_redis.pl',
+    '/usr/local/bin/get_content.sh',
+    ]
+%}
+{% for bin in nagios_bin_files %}
+{{bin}}:
     file.managed:
-        - source: salt://usr/local/bin/build_check_mysql_health
+        - source: salt:/{{bin}}
         - user: root
         - group: root
         - mode: 755
+{% endfor %}
 
 run_build_check_mysql_health:
     cmd:
@@ -41,7 +49,6 @@ run_build_check_mysql_health:
             - file: /usr/local/bin/build_check_mysql_health
             - pkg.installed: nagios_prereqs
 
-# From https://github.com/willixix/WL-NagiosPlugins/blob/master/check_redis.pl
 # 0.72, Oct 05, 2012
 /usr/local/bin/check_redis.pl:
     file.managed:
@@ -106,7 +113,9 @@ nagios3:
             - pkg.installed: fcgiwrap
             - pkg.installed: nagios-nrpe-plugin
             - cmd.run: run_build_check_mysql_health
-            - file: /usr/local/bin/check_redis.pl
+            {% for bin in nagios_bin_files -%}
+            - file: {{bin}}
+            {% endfor %}
     service:
         - running
         - require:
