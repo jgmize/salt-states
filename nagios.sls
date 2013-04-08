@@ -14,18 +14,35 @@ php5-fpm:
         - require:
             - pkg.installed: php5-fpm
 
-fcgiwrap:
-    pkg.installed
+nagios_prereqs:
+    pkg.installed:
+        - names:
+            - fcgiwrap              # For running php5 under nginx
+            - nagios-nrpe-plugin    # All the standard plugins and commands
+            - libdbi-perl           # For talking to MySQL
+            - libdbd-mysql-perl     # For talking to MySQL
+            - libmysqlclient-dev    # For talking to MySQL
+            - build-essential       # For buildiing check_mysql_health
 
-nagios-nrpe-plugin:
-    pkg.installed
+/usr/local/bin/build_check_mysql_health:
+    file.managed:
+        - source: salt://usr/local/bin/build_check_mysql_health
+        - user: root
+        - group: root
+        - mode: 755
 
-libdbi-perl:
-    pkg.installed
-
-libdbd-mysql-perl:
-    pkg.installed
-
+run_build_check_mysql_health:
+    cmd:
+        - run
+        - name: /usr/local/bin/build_check_mysql_health
+        - unless: /usr/bin/test -f /usr/local/nagios/libexec/check_mysql_health
+        - require:
+            - file: /usr/local/bin/build_check_mysql_health
+            - pkg.installed: nagios_prereqs
+#            - pkg.installed: libmysqlclient-dev
+#            - pkg.installed: build-essential
+#            - pkg.installed: libdbi-perl
+#            - pkg.installed: libdbd-mysql-perl
 
 /etc/nagios3/htpasswd.users:
     file.managed:
@@ -82,7 +99,7 @@ nagios3:
             - pkg.installed: php5-fpm
             - pkg.installed: fcgiwrap
             - pkg.installed: nagios-nrpe-plugin
-            #- cmd.run: run_build_check_mysql_health
+            - cmd.run: run_build_check_mysql_health
             #- file: /usr/local/bin/check_redis.pl
     service:
         - running
