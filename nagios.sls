@@ -23,6 +23,7 @@ nagios_prereqs:
             - libdbd-mysql-perl     # For talking to MySQL
             - libmysqlclient-dev    # For talking to MySQL
             - build-essential       # For buildiing check_mysql_health
+            - libredis-perl         # For talking to Redis
 
 /usr/local/bin/build_check_mysql_health:
     file.managed:
@@ -39,10 +40,15 @@ run_build_check_mysql_health:
         - require:
             - file: /usr/local/bin/build_check_mysql_health
             - pkg.installed: nagios_prereqs
-#            - pkg.installed: libmysqlclient-dev
-#            - pkg.installed: build-essential
-#            - pkg.installed: libdbi-perl
-#            - pkg.installed: libdbd-mysql-perl
+
+# From https://github.com/willixix/WL-NagiosPlugins/blob/master/check_redis.pl
+# 0.72, Oct 05, 2012
+/usr/local/bin/check_redis.pl:
+    file.managed:
+        - source: salt://usr/local/bin/check_redis.pl
+        - user: root
+        - group: root
+        - mode: 755
 
 /etc/nagios3/htpasswd.users:
     file.managed:
@@ -100,7 +106,7 @@ nagios3:
             - pkg.installed: fcgiwrap
             - pkg.installed: nagios-nrpe-plugin
             - cmd.run: run_build_check_mysql_health
-            #- file: /usr/local/bin/check_redis.pl
+            - file: /usr/local/bin/check_redis.pl
     service:
         - running
         - require:
