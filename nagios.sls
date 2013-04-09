@@ -81,6 +81,7 @@ run_build_check_mysql_health:
         - require:
             - pkg.installed: nagios3
 
+# Graphite
 /var/spool/nagios:
     file.directory:
         - user: nagios
@@ -94,6 +95,30 @@ run_build_check_mysql_health:
         - mode: 770
         - require:
             - file: /var/spool/nagios
+
+/usr/local/bin/graphios.py:
+    file.managed:
+        - source: salt://usr/local/bin/graphios.py.jinja
+        - template: jinja
+        - user: nagios
+        - group: www-data
+        - mode: 755
+        - require:
+            - file: /var/spool/nagios/graphios
+
+/etc/init/graphios.conf:
+    file.managed:
+        - source: salt://etc/init/graphios.conf
+        - require:
+            - file: /usr/local/bin/graphios.py
+
+graphios:
+    service:
+        - running
+        - watch:
+            - file: /usr/local/bin/graphios.py
+        - require:
+            - file: /etc/init/graphios.conf
 
 {% set nagios_config_files = [
     '/etc/nagios3/conf.d/contacts.cfg',
