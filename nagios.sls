@@ -26,12 +26,19 @@ nagios_prereqs:
             - libredis-perl         # For talking to Redis
             - python-redis          # For talking to Redis - with Python!
 
+nagiosplugin:
+    pip.installed
+
+python-statsd:
+    pip.installed
+
 {% set nagios_bin_files = [
     '/usr/local/bin/build_check_mysql_health',  
     '/usr/local/bin/check_redis.pl',
     '/usr/local/bin/get_content.sh',
     '/usr/local/bin/celery_task_queues.py',
     '/usr/local/bin/check_unsent_mail.sh',
+    '/usr/local/bin/check_rackspace_cloudfiles.py',
     ]
 %}
 {% for bin in nagios_bin_files %}
@@ -113,8 +120,7 @@ nagios3:
         - installed
         - require:
             - pkg.installed: php5-fpm
-            - pkg.installed: fcgiwrap
-            - pkg.installed: nagios-nrpe-plugin
+            - pkg.installed: nagios_prereqs
             - cmd.run: run_build_check_mysql_health
             {% for bin in nagios_bin_files -%}
             - file: {{bin}}
@@ -123,6 +129,8 @@ nagios3:
         - running
         - require:
             - file: /var/spool/nagios/graphios
+            - pip.installed: nagiosplugin
+            - pip.installed: python-statsd
         - watch:
             - file: /etc/nagios3/htpasswd.users
             - file: /etc/nagios3/nagios.cfg
@@ -147,17 +155,6 @@ nagios3:
         - user: nagios
         - group: www-data
         - mode: 770
-
-#python-cloudlb:
-#    pip.installed:
-#        - editable: git+git://github.com/rackspace/python-cloudlb.git@383d8f74806a9e27f5721dc14320c0c45e1b59c3#egg=python-cloudlb
-
-nagiosplugin:
-    pip.installed:
-        - editable: hg+https://bitbucket.org/gocept/nagiosplugin@de87901#egg=nagiosplugin
-
-python-statsd:
-    pip.installed
 
 # Uninstall previous files, or files installed by Ubuntu package
 {% for cf in nagios.get('config_files_absent', []) %}
