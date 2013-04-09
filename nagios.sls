@@ -24,11 +24,14 @@ nagios_prereqs:
             - libmysqlclient-dev    # For talking to MySQL
             - build-essential       # For buildiing check_mysql_health
             - libredis-perl         # For talking to Redis
+            - python-redis          # For talking to Redis - with Python!
 
 {% set nagios_bin_files = [
     '/usr/local/bin/build_check_mysql_health',  
     '/usr/local/bin/check_redis.pl',
     '/usr/local/bin/get_content.sh',
+    '/usr/local/bin/celery_task_queues.py',
+    '/usr/local/bin/check_unsent_mail.sh',
     ]
 %}
 {% for bin in nagios_bin_files %}

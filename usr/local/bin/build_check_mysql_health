@@ -1,0 +1,13 @@
+#!/bin/sh
+
+DIR=`mktemp -d`
+echo "Building in $DIR"
+cd "$DIR"
+/usr/bin/wget http://labs.consol.de/download/shinken-nagios-plugins/check_mysql_health-2.1.8.2.tar.gz
+/bin/tar -xpvf check_mysql_health-2.1.8.2.tar.gz
+cd check_mysql_health-2.1.8.2
+./configure
+/usr/bin/make
+/usr/bin/make install
+rm -rf "$DIR"
+
