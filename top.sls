@@ -7,24 +7,30 @@ base:
         - users
         - utils
         - vcs
+    'roles:celery':
+        - match: grain
+        - celery
     'roles:ci':
         - match: grain
         - jenkins
         - consumeraffairs_deps
         - nodejs
         - brunch
+    'roles:docsim':
+        - match: grain
+        - circus
     'roles:logstash':
         - match: grain
         - logstash
-    'roles:elasticsearch':
-        - match: grain
         - elasticsearch
-#        - kibana
+        - kibana
     'roles:lxc_host':
         - match: grain
         - iptables
         - lxc
         - nagios-nrpe
+        - ntp
+        - rclocal
     'roles:nagios':
         - match: grain
         - nagios
