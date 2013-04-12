@@ -12,7 +12,7 @@ COMMIT
 {#- make sure all jinja tags have the - at the beginning to remove whitespace b/c iptables-restore will throw an error on blank lines #}
 {%- set roles = grains.get('roles', []) %}
 {%- if 'lxc_host' in roles %}
-{%- set port_forwards = pillar.get('port_forwards', []) %}
+{%- set port_forwards = pillar.get('lxc_hosts', {}).get(grains['fqdn'], {}).get('port_forwards', []) %}
 {%- if port_forwards %}
 {%- for dnat in port_forwards %}
 {%- set source = dnat.get('source', None) %}
