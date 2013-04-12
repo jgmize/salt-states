@@ -1,0 +1,6 @@
+#!/bin/sh
+TMP=`mktemp /tmp/trim_backups.XXXXXXXXXX` || exit 1
+/var/backups/bin/create_trim_script.py > $TMP
+chmod +x $TMP
+$TMP
+rm $TMP

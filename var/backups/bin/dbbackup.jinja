@@ -1,0 +1,38 @@
+#!/bin/sh
+HOSTNAME=`hostname`
+NOW=`date '+%Y-%m-%d-%H-%M'`
+LOG="/var/backups/database/${HOSTNAME}_${NOW}.log"
+BACKUP_DIR="/var/backups/database"
+DB_FINAL="${BACKUP_DIR}/${HOSTNAME}_${NOW}.sql.gz"
+echo "Started at `date`" > $LOG
+{% set backup = pillar.get('percona', {}).get('backup', {}) %}
+{% set user = backup.get('db_user', 'backup') %}
+{% set password = backup.get('password', 'SET_PASSWORD_IN_PILLAR') %}
+
+mysqladmin -u {{user}} -p{{password}} stop-slave >> $LOG
+echo "Slave status is now:" >> $LOG
+mysql -u {{user}} -p{{password}} -e "SHOW SLAVE STATUS \\G;" >> $LOG
+echo "Starting full dump..." >> $LOG
+DB_TMP=`mktemp /tmp/full_backup_XXXXXXXXXX` || exit 1
+mysqldump -u {{user}} -p{{password}} --all-databases | gzip > $DB_TMP
+mv $DB_TMP $DB_FINAL
+chown --quiet backup:backup $DB_FINAL
+chmod --quiet 664 $DB_FINAL
+
+{% for db in backup.get('databases', []) %}
+DB_TMP=`mktemp /tmp/{{db}}_backup_XXXXXXXXXX` || exit 1
+DB_FINAL="${BACKUP_DIR}/${HOSTNAME}_{{db}}_latest.sql.gz"
+echo "Starting {{db}} dump..." >> $LOG
+mysqldump -u {{user}} -p{{password}} {{db}} | gzip > $DB_TMP
+mv $DB_TMP $DB_FINAL
+chown --quiet backup:backup $DB_FINAL
+chmod --quiet 664 $DB_FINAL
+{% endfor %}
+
+echo "Dump complete." >> $LOG
+mysqladmin -u {{user}} -p{{password}} start-slave >> $LOG
+echo "Cleaning up backups..." >> $LOG
+/var/backups/bin/clean_backups >> $LOG
+echo "Stopped at `date`" >> $LOG
+chown --quiet backup:backup $LOG
+chmod --quiet 664 $LOG
