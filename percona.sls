@@ -61,4 +61,57 @@ mysql:
         - watch:
             - file: /etc/mysql/my.cnf
 
-# TODO: backups
+{% if 'db_backup' in grains.get('roles', []) %}
+/var/backups/database:
+    file.directory:
+        - mode: 770
+        - user: backup
+        - group: backup
+
+/var/backups/bin:
+    file.directory:
+        - mode: 770
+        - user: backup
+        - group: backup
+
+/var/backups/bin/clean_backups:
+    file.managed:
+        - source: salt://var/backups/bin/clean_backups
+        - mode: 770
+        - user: backup
+        - group: backup
+        - require:
+            - file: /var/backups/bin
+
+/var/backups/bin/create_trim_script.py:
+    file.managed:
+        - source: salt://var/backups/bin/create_trim_script.py
+        - mode: 770
+        - user: backup
+        - group: backup
+        - require:
+            - file: /var/backups/bin
+
+/var/backups/bin/dbbackup:
+    file.managed:
+        - source: salt://var/backups/bin/dbbackup.jinja
+        - template: jinja
+        - mode: 770
+        - user: backup
+        - group: backup
+        - require:
+            - file: /var/backups/bin
+    cron.present:
+        - user: backup
+        - minute: 0
+        - hour: 7
+
+/var/backups/bin/secure-rsync:
+    file.managed:
+        - source: salt://var/backups/bin/secure-rsync
+        - mode: 770
+        - user: backup
+        - group: backup
+        - require:
+            - file: /var/backups/bin
+{% endif %}
