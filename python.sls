@@ -6,5 +6,3 @@ python:
             - python-dev
             - build-essential
             - ipython
-
-# vim:set ft=yaml:

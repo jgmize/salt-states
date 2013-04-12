@@ -5,11 +5,15 @@ supervisor:
     pkg:
         - installed
     service:
+    {%- if grains.get('site_maintenance_mode', False) %}
+        - dead
+    {%- else %}
         - running
         - watch:
-        {% for conf in configs %}
+        {%- for conf in configs %}
             - file: /etc/supervisor/conf.d/{{conf}}.conf
-        {% endfor %}
+        {%- endfor %}
+    {%- endif %}
 
 
 {% for conf in configs %}
