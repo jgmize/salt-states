@@ -10,6 +10,8 @@ include:
     - consumeraffairs_deps
     - brunch
 
+{% include 'punkt.sls' %}
+
 mkvirtualenv_{{username}}:
     cmd:
         - run
@@ -76,6 +78,21 @@ pip_install_requirements_{{username}}:
         - require:
             - cmd: clone_consumeraffairs_{{username}}
 
+{% set hgrc = pillar.get('hgrc', {}).get(grains['fqdn'], {}).get(username) %}
+{% if hgrc %}
+{{home}}/consumeraffairs/.hg/hgrc:
+    file.managed:
+        - source: salt://consumeraffairs/hgrc.jinja
+        - template: jinja
+        - context:
+           username: {{username}} 
+        - user: {{username}}
+        - group: {{username}}
+        - mode: 660
+        - require:
+            - cmd: clone_consumeraffairs_{{username}}
+{% endif %}
+
 {% if 'dev' in grains.get('roles', []) %}
 pip_install_requirements_dev_{{username}}:
     cmd:
@@ -89,24 +106,6 @@ pip_install_requirements_dev_{{username}}:
             - cmd: pip_install_requirements_{{username}}
 {% endif %}
 
-{{username}}_nltk_tokenizers_punkt:
-    pkg.installed:
-        - name: unzip
-    file.managed:
-        - name: {{home}}/nltk_data/tokenizers/punkt.zip
-        - source: salt://nltk_data/tokenizers/punkt.zip
-        - user: {{username}}
-        - makedirs: True
-        - require:
-            - user: {{username}}
-    cmd.run:
-        - name: 'unzip punkt.zip'
-        - cwd: {{home}}/nltk_data/tokenizers
-        - unless: test -d {{home}}/nltk_data/tokenizers/punkt
-        - user: {{username}}
-        - require:
-            - file.managed: {{home}}/nltk_data/tokenizers/punkt.zip
-            - pkg.installed: unzip
 
 install_frontend_dependencies:
     cmd.run:
