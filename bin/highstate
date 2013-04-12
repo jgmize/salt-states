@@ -1,4 +1,15 @@
-LOG=/srv/salt/log/$1.highstate.log
-echo Begin highstate `date` >> $LOG
-sudo salt $1 state.highstate 2>&1 >> $LOG
-echo End highstate `date` >> $LOG
+#!/bin/bash
+
+if [[ -z $1 || $1 == test=* ]]; then
+    LOG=/srv/salt/log/state.log
+    TARGET="*"
+   
+else
+    LOG="/srv/salt/log/$1.state.log"
+    TARGET="$1"
+    shift 1
+fi
+
+echo Begin highstate $@ `date` >> $LOG
+sudo salt "$TARGET" state.highstate $@ 2>&1 >> $LOG
+echo End highstate $@ `date` >> $LOG
