@@ -1,0 +1,48 @@
+127.0.0.1 localhost
+127.0.1.1 {{grains['fqdn']}} {{grains['host']}}
+{%- for host in pillar.get('hosts', {}).get('all', []) %}
+{{host}}
+{%- endfor %}
+
+{%- for host in pillar.get('hosts', {}).get(grains['fqdn'], []) %}
+{{host}}
+{%- endfor %}
+
+{%- for fqdn, host in pillar.get('lxc_hosts', {}).items() %}
+    {%- set containers = host.get('containers', {}) %}
+    {%- if fqdn == grains['fqdn'] %}
+        {%- set ip = host.get('eth0') %}
+        {%- if ip %}
+            {{ip}} {{fqdn}}{# Note that we specifically exlcude aliases in this case #}
+        {%- endif %}
+        {%- for container_fqdn, container in containers.items() %}
+            {%- set ip = container.get('eth0') %}
+            {%- if ip %}
+                {{ip}} {{container_fqdn}}{% for alias in container.get('aliases', []) %} {{alias}}{% endfor %}
+            {%- endif %}
+        {%- endfor %}
+    {%- elif containers.get(grains['fqdn']) %}
+        {%- set ip = host.get('lxcbr0') %}
+        {%- if ip %}
+            {{ip}} {{fqdn}}
+        {%- endif %}
+        {%- for container_fqdn, container in containers.items() %}
+            {%- set ip = container.get('eth0') %}
+            {%- if ip %}
+                {{ip}} {{container_fqdn}}{% for alias in container.get('aliases', []) %} {{alias}}{% endfor %}
+            {%- endif %}
+        {%- endfor %}
+    {%- else %}
+        {%- set ip = host.get('eth0') %}
+        {%- if ip %}
+            {{ip}} {{fqdn}}{% for alias in host.get('aliases', []) %} {{alias}}{% endfor %}
+        {%- endif %}
+        {%- for container_fqdn, container in containers.items() %}
+            {%- set tun0_ip = container.get('tun0') %}
+            {%- if tun0_ip %}
+                {{tun0_ip}} {{container_fqdn}}.vpn {{container_fqdn}}{% for alias in container.get('aliases', []) %} {{alias}}{% endfor %}
+            {%- endif %}
+        {%- endfor %}
+    {%- endif %}
+{%- endfor %}
+{#- vim: set filetype=jinja : #}
