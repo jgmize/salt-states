@@ -1,0 +1,11 @@
+{%- set circus = pillar.get('circus', {}) %}
+[circus]
+check_delay = {{circus.get('check_delay', 5)}}
+endpoint = {{circus.get('endpoint', 'tcp://127.0.0.1:5555')}}
+
+{%- for name, watcher in circus.get('watchers', {}).items() %}
+[watcher:{{name}}]
+cmd = {{watcher['cmd']}}
+args = {{watcher['args']}}
+working_dir = {{watcher['working_dir']}}
+{%- endfor %}
