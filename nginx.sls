@@ -1,4 +1,6 @@
 {% set sites = pillar.get('nginx', {}).get('sites', ['default']) %}
+{% set sites_disabled = pillar.get('nginx', {}).get('sites_disabled', []) %}
+{% if sites %}
 nginx:
     pkg:
         - installed
@@ -7,6 +9,10 @@ nginx:
         - watch:
 {% for site in sites %}
             - file: /etc/nginx/sites-available/{{site}}
+            - file: /etc/nginx/sites-enabled/{{site}}
+{% endfor %}
+{% for site in sites_disabled %}
+            - file: /etc/nginx/sites-enabled/{{site}}
 {% endfor %}
 
 {% for site in sites %}
@@ -23,6 +29,12 @@ nginx:
     file.symlink:
         - target: /etc/nginx/sites-available/{{site}}
 
+{% endfor %}
+{% endif %}
+
+{% for site in sites_disabled %}
+/etc/nginx/sites-enabled/{{site}}:
+    file.absent
 {% endfor %}
 
 #TODO: parameterize into pillar
