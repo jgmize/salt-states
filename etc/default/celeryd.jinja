@@ -1,0 +1,19 @@
+CELERYD_NODES="{{pillar.celery['nodes']}}"
+CELERYD_OPTS="{{pillar.celery['opts']}}"
+CELERYD_CHDIR="{{pillar.celery['chdir']}}"
+ENV_PYTHON="{{pillar.celery['env_python']}}"
+CELERYD_USER="{{pillar.celery['user']}}"
+CELERYD_GROUP="{{pillar.celery['group']}}"
+
+# How to call "manage.py celeryd_multi"
+CELERYD_MULTI="$ENV_PYTHON $CELERYD_CHDIR/manage.py celeryd_multi"
+
+# How to call "manage.py celeryctl"
+CELERYCTL="$ENV_PYTHON $CELERYD_CHDIR/manage.py celeryctl"
+
+# Name of the celery config module.
+CELERY_CONFIG_MODULE="celeryconfig"
+
+# %n will be replaced with the nodename.
+CELERYD_LOG_FILE="/var/log/celery/%n.log"
+CELERYD_PID_FILE="/var/run/celery/%n.pid"

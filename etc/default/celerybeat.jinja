@@ -1,0 +1,5 @@
+CELERYBEAT_CHDIR="{{pillar.celery['chdir']}}"
+export DJANGO_SETTINGS_MODULE="{{pillar.celery['django_settings_module']}}"
+ENV_PYTHON="{{pillar.celery['env_python']}}"
+CELERYBEAT="$ENV_PYTHON $CELERYBEAT_CHDIR/manage.py celerybeat"
+CELERYBEAT_OPTS="--schedule=/var/run/celery/celerybeat-schedule"
