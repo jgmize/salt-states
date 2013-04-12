@@ -23,20 +23,16 @@ slow_query_log_file = /var/log/mysql/mysql-slow.log
 long_query_time = 1
 
 log_bin = /var/log/mysql/mysql-bin.log
+log_slave_updates
 expire_logs_days = 10
 
 {% if not 'dev' in grains['fqdn'] %}
 #   InnoDB sizes
 innodb_buffer_pool_size = 6GB
 innodb_buffer_pool_instances = 6
-#   Changing this from default will require rebuilding log files
-#   http://www.mysqlperformanceblog.com/2011/07/09/how-to-change-innodb_log_file_size-safely/
-#innodb_log_file_size = 1GB
+innodb_log_file_size = 64M
 {% endif %}
-
-#   This will require reloading the database, switching master,
-#   but will keep ibdata1 from growing without bounds
-#innodb_file_per_table = ON # ON is invalid
+innodb_file_per_table
 
 #
 #   Recommended by pt-variable-advisor
@@ -53,6 +49,8 @@ slave_net_timeout = 60
 innodb_flush_method = O_DIRECT
 #   Sync the binlog after each commit
 sync_binlog = 1
+#   Set a small size for MySQL internal myisam tables
+key_buffer_size = 32M
 
 #
 #   Optional stuff in existing config - should try disabling
