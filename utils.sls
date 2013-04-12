@@ -3,11 +3,14 @@ utils:
         - names:
             - ack-grep
             - aptitude
+            - curl
             - dnsutils
+            - ethtool
             - htop
             - screen
             - vim-nox
             - exuberant-ctags
             - iptraf
-            - wget
             - tmux
+            - telnet
+            - wget
