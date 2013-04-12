@@ -1,0 +1,11 @@
+if [ "$2" ]; then
+    LOG=/srv/salt/log/$2.state.log
+    echo Begin state $1 `date` >> $LOG
+    sudo salt $2 state.sls $1 2>&1 >> $LOG
+    echo End state $1 `date` >> $LOG
+else
+    LOG=/srv/salt/log/state.log
+    echo Begin state $1 `date` >> $LOG
+    sudo salt \* state.sls $1 2>&1 >> $LOG
+    echo End state $1 `date` >> $LOG
+fi
