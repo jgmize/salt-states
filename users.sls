@@ -15,12 +15,13 @@
     group:
         - present
     {% endif %}
-    {% if 'uid' in user %}
     user.present:
         {% if 'fullname' in user %}
         - fullname: {{user.fullname}}
         {% endif %}
-        - shell: /bin/bash
+        {% if 'shell' in user%}
+        - shell: {{user.shell}}
+        {% endif %}
         {% if 'home' in user %}
         - home: {{home}}
         {% endif %}
@@ -41,7 +42,7 @@
             {% if username in pillar.sudo_group %}
             - sudo
             {% endif %}
-            {% if 'salt-master' in roles and username in pillar.salt_group %}
+            {% if 'salt_master' in roles and username in pillar.salt_group %}
             - salt
             {% endif %}
             {% if 'web' in roles and username in pillar.www_data_group %}
@@ -50,7 +51,7 @@
             {% if 'nagios' in roles and username in pillar.nagios_group  %}
             - nagios
             {% endif %}
-            {% if 'db-backup' in roles and username in pillar.backup_group %}
+            {% if username in pillar.backup_group %}
             - backup
             {% endif %}
         - require:
@@ -67,10 +68,6 @@
             - group: backup
             {% endif %}
             - group: {{username}}
-    {% else %}
-    user:
-        - present
-    {% endif %}
 
 {{home}}:
     file.directory:
@@ -114,6 +111,15 @@
         - require:
             - file: {{home}}/.ssh
 
+{% for host, fingerprint in user.get('ssh_known_hosts', {}).items() %}
+{{host}}:
+    ssh_known_hosts:
+        - present
+        - user: {{username}}
+        - fingerprint: {{fingerprint}}
+        - enc: ecdsa
+{% endfor %}
+
 {% if 'web' in roles and username in pillar.www_data_group %}
 www_data_authorized_key_{{username}}_{{loop.index}}:
     ssh_auth:
@@ -143,4 +149,8 @@ www_data_authorized_key_{{username}}_{{loop.index}}:
 
 {% endfor %}{# user #}
 
+{% for username in pillar.get('absent_users', []) %}
+{{username}}:
+    user.absent
+{% endfor %}
 # vim:set ft=yaml:
