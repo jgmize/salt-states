@@ -16,28 +16,22 @@ bootstrap-salt.sh:
         - require: 
             - cmd.run: lxc_create_base
 
-{% for container in pillar.get('containers', {}) %}
-lxc_create_{{container}}:
+
+{% for name, container in pillar.get('lxc_hosts', {}).get(grains['fqdn'], {}).get('containers', {}).items() %}
+lxc_create_{{name}}:
     cmd.run:
-        - name: 'lxc-clone -o base -n {{container}}'
-        - unless: test -d /var/lib/lxc/{{container}}
+        - name: 'lxc-clone -o base -n {{name}}'
+        - unless: test -d /var/lib/lxc/{{name}}
         - require:
             - file: bootstrap-salt.sh
 
-{% set config = pillar.containers.get(container).get('config', {}) %}
-{% if config %}
-/var/lib/lxc/{{container}}/config:
+{% set eth0 = container.get('eth0') %}
+{% if eth0%}
+/var/lib/lxc/{{name}}/config:
     file.append:
         - text:
-        {% for key, val in config.items() %}
-            - {{key}} = {{val}}
-        {% endfor %}
+            - lxc.network.ipv4 = {{eth0}}
         - require:
-            - cmd.run: lxc_create_{{container}}
-{% endif %}
-{% if pillar.containers.get(container).get('auto', True) %}
-/etc/lxc/auto/{{container}}:
-    file.symlink:
-        - target: /var/lib/lxc/{{container}}/config
+            - cmd.run: lxc_create_{{name}}
 {% endif %}
 {% endfor %}
