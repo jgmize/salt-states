@@ -169,6 +169,15 @@ start_beat () {
                 --pidfile="$CELERYBEAT_PID_FILE"
 }
 
+get_status () {
+    if [ -e $CELERYBEAT_PID_FILE ]; then
+        if [ -d /proc/$(cat $CELERYBEAT_PID_FILE) ]; then
+            echo "running (PID $(cat $CELERYBEAT_PID_FILE))"
+            return 0
+        fi
+    fi
+    echo "not running" 
+}
 
 
 case "$1" in
@@ -198,6 +207,9 @@ case "$1" in
     check-paths)
         check_dev_null
         check_paths
+    ;;
+    status)
+        get_status
     ;;
     *)
         echo "Usage: /etc/init.d/celerybeat {start|stop|restart|create-paths}"
