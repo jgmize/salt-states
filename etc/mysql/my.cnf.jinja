@@ -26,12 +26,11 @@ log_bin = /var/log/mysql/mysql-bin.log
 log_slave_updates
 expire_logs_days = 10
 
-{% if not 'dev' in grains['fqdn'] %}
-#   InnoDB sizes
+{%- if grains['mem_total'] > 12000 %}
 innodb_buffer_pool_size = 6GB
 innodb_buffer_pool_instances = 6
+{%- endif %}
 innodb_log_file_size = 64M
-{% endif %}
 innodb_file_per_table
 
 #
