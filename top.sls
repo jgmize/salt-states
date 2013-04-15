@@ -1,7 +1,9 @@
 base:
     '*':
         - hosts
+        - locale
         - openvpn
+        - postfix
         - python
         - rsyslog
         - users
