@@ -61,7 +61,6 @@ mysql:
         - watch:
             - file: /etc/mysql/my.cnf
 
-{% if 'db_backup' in grains.get('roles', []) %}
 /var/backups/database:
     file.directory:
         - mode: 770
@@ -92,6 +91,56 @@ mysql:
         - require:
             - file: /var/backups/bin
 
+/var/backups/bin/replica_status:
+    file.managed:
+        - source: salt://var/backups/bin/replica_status.jinja
+        - template: jinja
+        - mode: 770
+        - user: backup
+        - group: backup
+        - require:
+            - file: /var/backups/bin
+
+/var/backups/bin/start_replication:
+    file.managed:
+        - source: salt://var/backups/bin/start_replication.jinja
+        - template: jinja
+        - mode: 770
+        - user: backup
+        - group: backup
+        - require:
+            - file: /var/backups/bin
+
+/var/backups/bin/stop_replication:
+    file.managed:
+        - source: salt://var/backups/bin/stop_replication.jinja
+        - template: jinja
+        - mode: 770
+        - user: backup
+        - group: backup
+        - require:
+            - file: /var/backups/bin
+
+/var/backups/bin/master_status:
+    file.managed:
+        - source: salt://var/backups/bin/master_status.jinja
+        - template: jinja
+        - mode: 770
+        - user: backup
+        - group: backup
+        - require:
+            - file: /var/backups/bin
+
+/var/backups/bin/change_master:
+    file.managed:
+        - source: salt://var/backups/bin/change_master.jinja
+        - template: jinja
+        - mode: 770
+        - user: backup
+        - group: backup
+        - require:
+            - file: /var/backups/bin
+
 /var/backups/bin/dbbackup:
     file.managed:
         - source: salt://var/backups/bin/dbbackup.jinja
@@ -101,7 +150,11 @@ mysql:
         - group: backup
         - require:
             - file: /var/backups/bin
+{%- if 'db_backup' in grains.get('roles', []) %}
     cron.present:
+{%- else %}
+    cron.absent:
+{%- endif %}
         - user: backup
         - minute: 0
         - hour: 7
@@ -114,4 +167,3 @@ mysql:
         - group: backup
         - require:
             - file: /var/backups/bin
-{% endif %}

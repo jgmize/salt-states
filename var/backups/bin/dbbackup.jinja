@@ -5,13 +5,13 @@ LOG="/var/backups/database/${HOSTNAME}_${NOW}.log"
 BACKUP_DIR="/var/backups/database"
 DB_FINAL="${BACKUP_DIR}/${HOSTNAME}_${NOW}.sql.gz"
 echo "Started at `date`" > $LOG
-{% set backup = pillar.get('percona', {}).get('backup', {}) %}
-{% set user = backup.get('db_user', 'backup') %}
-{% set password = backup.get('password', 'SET_PASSWORD_IN_PILLAR') %}
+{%- set backup = pillar.get('percona', {}).get('backup', {}) %}
+{%- set user = backup.get('db_user', 'backup') %}
+{%- set password = backup.get('password', 'SET_PASSWORD_IN_PILLAR') %}
 
-mysqladmin -u {{user}} -p{{password}} stop-slave >> $LOG
-echo "Slave status is now:" >> $LOG
-mysql -u {{user}} -p{{password}} -e "SHOW SLAVE STATUS \\G;" >> $LOG
+/var/backups/bin/stop_replication >> $LOG
+echo "Replication status is now:" >> $LOG
+/var/backups/bin/replica_status >> $LOG
 echo "Starting full dump..." >> $LOG
 DB_TMP=`mktemp /tmp/full_backup_XXXXXXXXXX` || exit 1
 mysqldump -u {{user}} -p{{password}} --all-databases | gzip > $DB_TMP
@@ -30,7 +30,7 @@ chmod --quiet 664 $DB_FINAL
 {% endfor %}
 
 echo "Dump complete." >> $LOG
-mysqladmin -u {{user}} -p{{password}} start-slave >> $LOG
+/var/lib/backups/bin/start_replication >> $LOG
 echo "Cleaning up backups..." >> $LOG
 /var/backups/bin/clean_backups >> $LOG
 echo "Stopped at `date`" >> $LOG

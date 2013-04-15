@@ -1,0 +1,5 @@
+#!/bin/sh
+{%- set backup = pillar.get('percona', {}).get('backup', {}) %}
+{%- set user = backup.get('db_user', 'backup') %}
+{%- set password = backup.get('password', 'SET_PASSWORD_IN_PILLAR') %}
+mysqladmin -u {{user}} -p{{password}} stop-slave

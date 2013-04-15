@@ -1,0 +1,10 @@
+#!/bin/sh
+{%- set backup = pillar.get('percona', {}).get('backup', {}) %}
+{%- set user = backup.get('db_user', 'backup') %}
+{%- set password = backup.get('password', 'SET_PASSWORD_IN_PILLAR') %}
+{%- set master = pillar.get('percona', {}).get('master', {}) %}
+{%- if master %}
+mysql -u {{user}} -p{{password}} -e "change master to MASTER_HOST='{{master['host']}}', MASTER_LOG_FILE='{{master['log_file']}}', MASTER_USER='{{master['user']}}', MASTER_PASSWORD='{{master['password']}}', MASTER_LOG_POS={{master['log_position']}};"
+{%- else %}
+mysql -u {{user}} -p{{password}} -e "reset master;"
+{%- endif %}
