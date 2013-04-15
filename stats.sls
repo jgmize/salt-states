@@ -12,45 +12,58 @@ graphite_system_requirements:
             - python-cairo
             - memcached
 
-pip_install_whisper_carbon_graphite_web:
+graphite_pip_requirements:
     pip.installed:
         - names:
             - whisper
-            - carbon
-            - graphite-web
             - django==1.3
             - python-memcached
             - django-tagging
             - gunicorn
-        #- unless: test -d /opt/graphite
         - require:
             - pkg: libcairo2
             - pkg: libcairo2-dev
             - pkg: python-cairo
 
+# carbon doesn't install well with pip.installed, salt 0.14.0
+install_carbon:
+    cmd.run:
+        - name: pip install carbon 
+        - require:
+            - pip: graphite_pip_requirements
+        - unless: test -f /opt/graphite/bin/carbon-client.py
+
+# graphite_web doesn't install well with pip.installed, salt 0.14.0
+install_graphite_web:
+    cmd.run:
+        - name: pip install graphite_web
+        - require:
+            - cmd.run: install_carbon
+        - unless: test -d /opt/graphite/webapp/
+
 /opt/graphite/conf/carbon.conf:
     file.managed:
         - source: salt://opt/graphite/conf/carbon.conf
         - require:
-            - pip: pip_install_whisper_carbon_graphite_web
+            - cmd.run: install_carbon
 
 /opt/graphite/conf/storage-schemas.conf:
     file.managed:
         - source: salt://opt/graphite/conf/storage-schemas.conf
         - require:
-            - pip: pip_install_whisper_carbon_graphite_web
+            - cmd.run: install_carbon
 
 /opt/graphite/conf/storage-aggregation.conf:
     file.managed:
         - source: salt://opt/graphite/conf/storage-aggregation.conf
         - require:
-            - pip: pip_install_whisper_carbon_graphite_web
+            - cmd.run: install_carbon
 
 /opt/graphite/webapp/graphite/local_settings.py:
     file.managed:
         - source: salt://opt/graphite/webapp/graphite/local_settings.py
         - require:
-            - pip: pip_install_whisper_carbon_graphite_web
+            - cmd.run: install_graphite_web
 
 syncdb:
     cmd.run:
@@ -77,4 +90,5 @@ git://github.com/etsy/statsd.git:
         - recurse:
             - user
         - require:
-            - pip: pip_install_whisper_carbon_graphite_web
+            - cmd.run: install_carbon
+            - cmd.run: install_graphite_web
