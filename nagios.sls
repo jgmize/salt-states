@@ -23,7 +23,6 @@ nagios_prereqs:
             - libdbd-mysql-perl     # For talking to MySQL
             - libmysqlclient-dev    # For talking to MySQL
             - build-essential       # For buildiing check_mysql_health
-            - libredis-perl         # For talking to Redis
             - python-redis          # For talking to Redis - with Python!
 
 nagiosplugin:
@@ -59,6 +58,16 @@ run_build_check_mysql_health:
             - file: /usr/local/bin/build_check_mysql_health
             - pkg.installed: nagios_prereqs
 
+# Using non-supported redis 2.6, so need to install upgraded Perl library
+# However, CPAN is a pain to use in salt
+# TODO: Create a ppa for libredis-perl 1.961
+#install_libredis-perl:
+#    cmd:
+#        - run
+#        - name: perl -MCPAN -e 'install Redis'
+#        - onlyif: perl -MRedis -e 'die if "$Redis::VERSION" != "1.961"'
+#        - runsas: root
+
 # 0.72, Oct 05, 2012
 /usr/local/bin/check_redis.pl:
     file.managed:
@@ -66,6 +75,8 @@ run_build_check_mysql_health:
         - user: root
         - group: root
         - mode: 755
+#    require:
+#        - cmd.run: install_libredis-perl
 
 /etc/nagios3/htpasswd.users:
     file.managed:
