@@ -27,6 +27,7 @@ log_slave_updates
 expire_logs_days = 10
 
 {%- if grains['mem_total'] > 12000 %}
+innodb_log_buffer_size = 64M
 innodb_buffer_pool_size = 6GB
 innodb_buffer_pool_instances = 6
 {%- endif %}
