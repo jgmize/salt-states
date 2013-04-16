@@ -30,7 +30,7 @@ chmod --quiet 664 $DB_FINAL
 {% endfor %}
 
 echo "Dump complete." >> $LOG
-/var/lib/backups/bin/start_replication >> $LOG
+/var/backups/bin/start_replication >> $LOG
 echo "Cleaning up backups..." >> $LOG
 /var/backups/bin/clean_backups >> $LOG
 echo "Stopped at `date`" >> $LOG
