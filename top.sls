@@ -21,7 +21,10 @@ base:
     'roles:docsim':
         - match: grain
         - circus
-    'roles:logstash':
+    'roles:ftp':
+        - match: grain
+        - ftp
+    'roles:log_server':
         - match: grain
         - logstash
         - elasticsearch
