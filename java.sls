@@ -1,4 +1,4 @@
 java-jre:
-    pkg.latest:
+    pkg.installed:
         - name: openjdk-7-jre-headless
         - refresh: True
