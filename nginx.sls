@@ -3,6 +3,7 @@
 {% if sites %}
 nginx:
     pkg:
+        - name: nginx-extras
         - installed
     service:
         - running
@@ -36,6 +37,38 @@ nginx:
 /etc/nginx/sites-enabled/{{site}}:
     file.absent
 {% endfor %}
+
+{% set ssl = pillar.get('nginx', {}).get('ssl', {}) %}
+{% if ssl %}
+/etc/nginx/ssl:
+    file.directory:
+        - user: www-data
+        - group: www-data
+        - mode: 755
+        - makedirs: True
+
+/etc/nginx/ssl/{{ssl['cert_filename']}}:
+    file.managed:
+        - source: salt://etc/nginx/ssl/cert.jinja
+        - template: jinja
+        - user: www-data
+        - group: www-data
+        - mode: 664
+        - require:
+            - pkg: nginx
+            - file: /etc/nginx/ssl
+
+/etc/nginx/ssl/{{ssl['key_filename']}}:
+    file.managed:
+        - source: salt://etc/nginx/ssl/key.jinja
+        - template: jinja
+        - user: www-data
+        - group: www-data
+        - mode: 660
+        - require:
+            - pkg: nginx
+            - file: /etc/nginx/ssl
+{% endif %}
 
 #TODO: parameterize into pillar
 /var/www/conaff/files:
