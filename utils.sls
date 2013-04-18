@@ -7,6 +7,7 @@ utils:
             - dnsutils
             - ethtool
             - htop
+            - lsof
             - screen
             - vim-nox
             - exuberant-ctags
