@@ -1,0 +1,43 @@
+#!/bin/bash 
+
+# Author - Matt Mencel - 2012
+# Borrowed heavily from Patrick McKenzie's example 
+# Modified hastily by Knapp
+# http://www.kalzumeus.com/2010/01/15/deploying-sinatra-on-ubuntu-in-which-i-employ-a-secretary/
+#
+# kibana-daemon       Startup script for the Kibana Web UI running on sinatra 
+# chkconfig: 2345 20 80
+#
+## Copy to /etc/init.d/kibana and make it executable
+## Add to system startup through chkconfig (CentOS/RHEL) or Upstart (Ubuntu)
+KIBANA_PATH="/var/lib/kibana"
+PID_FILE=$KIBANA_PATH/tmp/kibana.rb.pid
+RUBY="/usr/bin/ruby"
+DAEMON="$KIBANA_PATH/kibana-daemon.rb"
+RUBY_OPTS=" -- $DAEMON 'start'"
+K_USER=kibana
+K_GROUP=kibana
+DESC=kibana
+
+case "$1" in
+  start)
+        echo "Starting $DESC"
+		echo 'firing it up'
+	        start-stop-daemon --start --user "$K_USER" --group "$K_GROUP" --exec $DAEMON -- start
+		ps aux | grep kibana.rb | grep -v grep
+        ;;
+  restart)
+      kill `cat $PID_FILE`
+      rm $PID_FILE
+      /etc/init.d/kibana start
+  ;;
+  stop)
+      kill `cat $PID_FILE`
+      rm $PID_FILE
+  ;;
+  status)
+	ps aux | grep kibana.rb | grep -v grep
+  ;;
+esac
+
+exit 0

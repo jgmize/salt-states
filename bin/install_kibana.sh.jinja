@@ -1,0 +1,19 @@
+#!/bin/bash
+cd /var/lib
+
+wget https://github.com/rashidkpc/Kibana/archive/v0.2.0.tar.gz -O kibana.tar.gz
+tar xzf kibana.tar.gz
+mv Kibana-0.2.0 kibana
+
+cd kibana
+gem install bundler
+bundle install
+
+chmod 755 kibana-daemon.rb
+
+if ruby /var/lib/kibana/kibana.rb --help 2>&1; then 
+    echo 'kibana launch test as root passed'
+    rm kibana.tar.gz
+else
+    exit 1
+fi
