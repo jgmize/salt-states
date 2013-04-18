@@ -23,7 +23,7 @@ case "$1" in
   start)
         echo "Starting $DESC"
 		echo 'firing it up'
-	        start-stop-daemon --start --user "$K_USER" --group "$K_GROUP" --exec $DAEMON -- start
+	        start-stop-daemon --start --chuid "$K_USER" --group "$K_GROUP" --exec $DAEMON -- start
 		ps aux | grep kibana.rb | grep -v grep
         ;;
   restart)

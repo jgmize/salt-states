@@ -10,6 +10,7 @@ gem install bundler
 bundle install
 
 chmod 755 kibana-daemon.rb
+chown -R kibana:kibana /var/lib/kibana
 
 if ruby /var/lib/kibana/kibana.rb --help 2>&1; then 
     echo 'kibana launch test as root passed'
