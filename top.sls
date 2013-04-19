@@ -12,6 +12,7 @@ base:
     'roles:celery':
         - match: grain
         - celery
+        - nagios-nrpe
     'roles:ci':
         - match: grain
         - jenkins
