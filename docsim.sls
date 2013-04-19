@@ -56,8 +56,9 @@ PyYAML:
 
 
 django-document-similarity-requirements:
-    pip.installed:
-        - requirements: {{home}}/django-document-similarity/requirements.txt
+    cmd.run:
+        - name: pip install -r {{home}}/django-document-similarity/requirements.txt
+        - unless: pip freeze | grep -q 'Pyro4==4.16' 
         - require:
             - pip: PyYAML
             - pip: simserver
