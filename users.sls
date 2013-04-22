@@ -6,6 +6,11 @@
 {% else %}
   {% set home = "/home/%s" % username %}
 {% endif %}
+{% if 'keep_modified_local_settings' in user %}
+  {% set keep_modified_local_settings = user.keep_modified_local_settings %}
+{% else %}
+  {% set keep_modified_local_settings = False %}
+{% endif %}
 
 {{username}}:
     {% if 'gid' in user %}

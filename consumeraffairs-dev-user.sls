@@ -2,6 +2,7 @@
 # Context from users.sls
 # username: {{username}}
 # home: {{home}}
+# keep_modified_local_settings: {{keep_modified_local_settings}}
 
 {% if username in grains.get('consumeraffairs_dev_users', []) %}
 include:
@@ -74,6 +75,9 @@ pip_install_requirements_{{username}}:
         - template: jinja
         - user: {{username}}
         - group: {{username}}
+        {% if keep_modified_local_settings %}
+        - replace: false
+        {% endif %}
         - mode: 660
         - require:
             - cmd: clone_consumeraffairs_{{username}}
