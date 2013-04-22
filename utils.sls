@@ -8,6 +8,7 @@ utils:
             - ethtool
             - htop
             - lsof
+            - man-db
             - screen
             - vim-nox
             - exuberant-ctags
