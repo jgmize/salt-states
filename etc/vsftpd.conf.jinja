@@ -151,4 +151,8 @@ hide_ids=YES
 pasv_address={{ftp.get('pasv_address', '127.0.0.1')}}
 pasv_min_port={{ftp.get('pasv_port_range', ['32000','32127'])[0]}}
 pasv_max_port={{ftp.get('pasv_port_range', ['32000','32127'])[1]}}
-
+syslog_enable=YES
+{% if ftp.get('debug') -%}
+log_ftp_protocol=YES
+debug_ssl=YES
+{% endif -%}
