@@ -1,0 +1,60 @@
+{% set elastic_search = pillar['logstash']['elastic_search_server'] -%}
+# logstash confs have three parts:
+# log 1) input 2) filter 3) output
+# http://logstash.net/docs/1.1.9/configuration 
+input {
+  tcp {
+    port => 5554
+    type => "mysql_error"
+  }
+  udp {
+    port => 5554
+    type => "mysql_error"
+  }
+}
+filter {
+  # mysql query logs sometimes are missing a timestamp
+  # and use spaces instead (WTF), so merge timestampless events with the
+  # previous event.
+  multiline {
+    type => "mysql_error"
+    what => previous
+    pattern => "^\s"
+  }
+   # pull out the timestamp (like, "120707  0:40:34")
+  grok { 
+    type => "mysql_error"
+    pattern => "^%{NUMBER:date} *%{NOTSPACE:time}" 
+  }
+  # put the timestamp into a single field
+  mutate {     
+    type => "mysql_error"
+    replace => [ "time", "%{date} %{time}" ] 
+  }
+   # parse the timestamp, which could be one or two digits.
+  date { 
+    type => "mysql_error"
+    time => [ "YYMMdd H:mm:ss", "YYMMdd HH:mm:ss" ] 
+  }
+   # remove time/date fields only previously added for parsing.
+  mutate { 
+    type => "mysql_error"
+    remove => [ "time", "date" ] 
+  }
+  # Now split up the multiline again, which keeps the timestamp for all split
+  # out events. The defaults here are fine as they split '@message' by '\n'
+  #split {
+  #  type => "mysql_error"
+  #}
+}
+output {
+  elasticsearch {
+    index => "syslog-%{+YYYY.MM.dd}"
+    #run with elastic search in the same process or not
+    embedded => false
+    host => "{{elastic_search}}"
+    type => "mysql_error"
+  }
+  # for debugging
+  #stdout { debug => true debug_format => json }
+}
