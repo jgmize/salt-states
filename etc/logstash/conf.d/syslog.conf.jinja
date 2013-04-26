@@ -5,12 +5,12 @@
 input {
   tcp {
     port => 5544
-    type => syslog
+    type => "syslog"
   }
 
   udp {
     port => 5544
-    type => syslog
+    type => "syslog"
   }
 }
 filter {
@@ -47,6 +47,7 @@ output {
         # run with elastic search in the same process or not
         embedded => false
         host => "{{elastic_search}}"
+        type => "syslog"
     }
     # for debugging
     #stdout { debug => true debug_format => json }
