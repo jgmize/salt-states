@@ -9,7 +9,7 @@
 
 {%- if 'web' in roles %}
 # filter tcp connections from monitoring server
-:msg, contains,  " - - - - " ~
+:msg, contains,  '"-" 400 0 "-" "-"' ~
 {%- endif %}
 
 
@@ -90,6 +90,7 @@ $ActionQueueSaveOnShutdown on          # save in-memory data if rsyslog shuts do
 
 # Provides TCP forwarding. But the current server runs on UDP
 # logstash UDP is only beta.  Use TCP for now
+#:syslogtag, isequal, "mysql_error" @@{{rsyslog_server}}:5554
 *.* @@{{rsyslog_server}}:5544
 
 
