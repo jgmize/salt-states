@@ -8,14 +8,14 @@
 {{host}}
 {%- endfor %}
 
-{%- for fqdn, host in pillar.get('lxc_hosts', {}).items() %}
+{%- for fqdn, host in pillar.get('lxc_hosts', {})|dictsort %}
     {%- set containers = host.get('containers', {}) %}
     {%- if fqdn == grains['fqdn'] %}
         {%- set ip = host.get('eth0') %}
         {%- if ip %}
             {{ip}} {{fqdn}}{# Note that we specifically exlcude aliases in this case #}
         {%- endif %}
-        {%- for container_fqdn, container in containers.items() %}
+        {%- for container_fqdn, container in containers|dictsort %}
             {%- set ip = container.get('eth0') %}
             {%- if ip %}
                 {{ip}} {{container_fqdn}}{% for alias in container.get('aliases', []) %} {{alias}}{% endfor %}
@@ -26,7 +26,7 @@
         {%- if ip %}
             {{ip}} {{fqdn}}
         {%- endif %}
-        {%- for container_fqdn, container in containers.items() %}
+        {%- for container_fqdn, container in containers|dictsort %}
             {%- set ip = container.get('eth0') %}
             {%- if ip %}
                 {{ip}} {{container_fqdn}}{% for alias in container.get('aliases', []) %} {{alias}}{% endfor %}
@@ -37,7 +37,7 @@
         {%- if ip %}
             {{ip}} {{fqdn}}{% for alias in host.get('aliases', []) %} {{alias}}{% endfor %}
         {%- endif %}
-        {%- for container_fqdn, container in containers.items() %}
+        {%- for container_fqdn, container in containers|dictsort %}
             {%- set tun0_ip = container.get('tun0') %}
             {%- if tun0_ip %}
                 {{tun0_ip}} {{container_fqdn}}.vpn {{container_fqdn}}{% for alias in container.get('aliases', []) %} {{alias}}{% endfor %}
