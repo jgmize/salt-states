@@ -1,0 +1,78 @@
+{% set elastic_search = pillar['logstash']['elastic_search_server'] -%}
+# logstash confs have three parts:
+# log 1) input 2) filter 3) output
+# http://logstash.net/docs/1.1.9/configuration 
+input {
+  tcp {
+    port => 5554
+    type => "mysql_error"
+  }
+  udp {
+    port => 5554
+    type => "mysql_error"
+  }
+}
+filter {
+  # grab the message without prepended rsyslog cruft
+  # rsyslog timestamps are worthless anyway
+  grok { 
+    type => "mysql_error"
+    pattern => ".*mysql_error: %{GREEDYDATA:uncrufted}"
+  }
+  mutate {
+    type => "mysql_error"
+    replace => ["@message", "%{uncrufted}"]
+    exclude_tags => "_grokparsefailure"
+    remove => ['uncrufted']
+  }
+  # mysql query logs sometimes are missing a timestamp
+  # and use skpaces instead (WTF), so merge timestampless events with the
+  # previous event.
+  multiline {
+    type => "mysql_error"
+    what => previous
+    pattern => "\d{6} \d{2}:\d{2}:\d{2} "
+    negate => true
+  }
+  # everything after this point is to replace the rsyslog timestamp
+  # with the mysql one.
+  # pull out the timestamp (like, "120707  0:40:34")
+  # grab everything after timestamp so we can clean up the @message later
+  grok { 
+    type => "mysql_error"
+    pattern => "(?m)%{NUMBER:date} *%{NOTSPACE:time} (?<uncrufted>.*)" 
+  }
+  # put the timestamp into a single field
+  mutate {     
+    type => "mysql_error"
+    replace => [ "time", "%{date} %{time}" ] 
+  }
+  # parse the timestamp, which could be one or two digits.
+  date {
+    type => "mysql_error"
+    time => [ "YYMMdd H:mm:ss", "YYMMdd HH:mm:ss" ] 
+  }
+  # remove time/date fields only previously added for parsing.
+  mutate { 
+    type => "mysql_error"
+    remove => [ "time", "date" ] 
+  }
+  # remove the timestamp at the front of the @message
+  mutate {     
+    type => "mysql_error"
+    replace => ["@message", "%{uncrufted}"]
+    exclude_tags => "_grokparsefailure"
+    remove => ['uncrufted']
+  }
+}
+output {
+  elasticsearch {
+    index => "syslog-%{+YYYY.MM.dd}"
+    #run with elastic search in the same process or not
+    embedded => false
+    host => "{{elastic_search}}"
+    type => "mysql_error"
+  }
+  # for debugging
+  #stdout { debug => true debug_format => json }
+}
