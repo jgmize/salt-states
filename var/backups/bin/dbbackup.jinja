@@ -14,7 +14,7 @@ echo "Replication status is now:" >> $LOG
 /var/backups/bin/replica_status >> $LOG
 echo "Starting full dump..." >> $LOG
 DB_TMP=`mktemp /tmp/full_backup_XXXXXXXXXX` || exit 1
-mysqldump -u {{user}} -p{{password}} --all-databases | gzip > $DB_TMP
+mysqldump -u {{user}} -p{{password}} --all-databases --events --ignore-table=mysql.events | gzip > $DB_TMP
 mv $DB_TMP $DB_FINAL
 chown --quiet backup:backup $DB_FINAL
 chmod --quiet 664 $DB_FINAL
