@@ -33,7 +33,7 @@ $ModLoad imfile   # read from files
 # Read from files
 {%- for watch in pillar.get('rsyslog', {}).get('watch_log_files', []) %}
 $InputFileName {{ watch['file'] }}
-$InputFileTag {{ watch['tag'] }}:
+$InputFileTag {{ watch['tag'] }}
 $InputFileStateFile {{ watch['tag'] }}
 $InputFileSeverity {{ watch['severity'] }}
 $InputFileFacility {{ watch['facility'] }}
@@ -88,17 +88,22 @@ $ActionQueueFileName rsyslog_spillage  # set file name, also enables disk mode
 $ActionResumeRetryCount -1             # infinite retries on insert failure
 $ActionQueueSaveOnShutdown on          # save in-memory data if rsyslog shuts down
 
-# Provides TCP forwarding. But the current server runs on UDP
-# logstash UDP is only beta.  Use TCP for now
-#:syslogtag, isequal, "mysql_error" @@{{rsyslog_server}}:5554
+# Let's forward specific logs to separate ports for
+# more fine-grained logstash parsing
+# the & ~ line ends processing by subsequent selectors
+{%- for watch in pillar.get('rsyslog', {}).get('watch_log_files', []) %}
+:syslogtag, isequal, "{{ watch['tag'] }}" @@10.0.3.32:{{ watch['port'] }}
+& ~
+{%- endfor %}
+
+# Provides TCP forwarding.
 *.* @@{{rsyslog_server}}:5544
 
-
 # forward messages to the remote server "myserv" on
-# port 2514
+# port 2514 via RELP format
 #*.* :omrelp:{{rsyslog_server}}:5544;LOGSTASH
 
-#
+
 # Include all config files in /etc/rsyslog.d/
 #
 $IncludeConfig /etc/rsyslog.d/*.conf

@@ -1,0 +1,16 @@
+# GLOBAL FORMAT OF MYSQL SLOW QUERY LOGS BY LINE 
+MYSQLQUERYDATE #%{SPACE}Time:%{SPACE}%{MONTHDAY:day}%{MONTHNUM:month}%{YEAR:year}%{SPACE}%{HOUR:hour}:%{MINUTE:minute}:%{SECOND:second}
+MYSQLQUERYUSER #%{SPACE}User@Host:%{SPACE}%{USERNAME:login}\[%{USERNAME}\]%{SPACE}@ %{SPACE}%{HOST:source}
+MYSQLQUERYSCHEMA #%{SPACE}Thread\_id\:%{SPACE}%{INT}%{SPACE}Schema:%{SPACE}%{USERNAME:database} 
+MYSQLQUERYEXECTIME #%{SPACE}Query_time: %{BASE10NUM:query_time}%{SPACE}Lock_time:%{SPACE}%{BASE10NUM:lock_time}%{SPACE}Rows_sent:%{SPACE}%{INT:rows_sent}%{SPACE}Rows_examined:%{SPACE}%{INT:rows_examined}%{SPACE}Rows_affected:%{SPACE}%{INT:rows_affected}%{SPACE}Rows_read:%{SPACE}%{INT:rows_read}
+
+# Sometimes those next two lines are not present.. check with |a^) to match null 
+MYSQLQUERYSCAN #%{SPACE}Full_scan:%{SPACE}%{YESNO:fullscan}%{SPACE}Full_join:%{SPACE}%{YESNO:fulljoin}%{SPACE}Tmp_table:%{SPACE}%{YESNO:tmptable}%{SPACE}Tmp_table_on_disk:%{SPACE}%{YESNO:tmptableondisk}
+MYSQLQUERYFILESORT #%{SPACE}Filesort:%{SPACE}%{YESNO:filesort}%{SPACE}Filesort_on_disk:%{SPACE }%{YESNO:filesortondisk}%{SPACE}Merge_passes:%{SPACE}%{INT:mergepasses:int}
+
+MYSQLBYTESSENT # Bytes_sent: %{INT:bytes_sent}
+MYSQLQUERY SET timestamp=%{INT:unixtime};\n%{GREEDYDATA:query}
+
+# ADDITTIONAL PERSONAL PATTERNS 
+#MYSQLDBNAME ([0-9a-zA-Z_-]){1,64} 
+YESNO [y|Y][e|E][s|S]|[n|N][o|O] 
