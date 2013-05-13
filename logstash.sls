@@ -1,3 +1,5 @@
+{% set logstash_confs = pillar.get('logstash', {}).get('confs', []) %}
+{% set logstash_patterns = pillar.get('logstash', {}).get('patterns', []) %}
 include:
     - java
 
@@ -17,26 +19,30 @@ logstash:
         - require:
             - pkg: logstash         
         - watch:
-            - file: /etc/logstash/conf.d/syslog.conf
-#            - file: /etc/logstash/conf.d/mysql_error.conf
+              {% for conf in logstash_confs %}
+            - file: /etc/logstash/conf.d/{{conf}}.conf
+              {% endfor %}
 
-
-/etc/logstash/conf.d/syslog.conf:
+{% for conf in logstash_confs %}
+/etc/logstash/conf.d/{{ conf }}.conf:
     file.managed:
-        - source: salt://etc/logstash/conf.d/syslog.conf.jinja
+        - source: salt://etc/logstash/conf.d/{{ conf }}.jinja
         - template: jinja
         - user: logstash
         - group: logstash
         - mode: 664
         - require:
             - pkg: logstash
+{% endfor %}
 
-#/etc/logstash/conf.d/mysql_error.conf:
-#    file.managed:
-#        - source: salt://etc/logstash/conf.d/mysql_error.conf.jinja
-#        - template: jinja
-#        - user: logstash
-#        - group: logstash
-#        - mode: 664
-#        - require:
-#            - pkg: logstash
+{% for pattern in logstash_patterns %}
+/etc/logstash/patterns/{{ pattern }}:
+    file.managed:
+        - source: salt://etc/logstash/patterns/{{ pattern }}.jinja
+        - template: jinja
+        - user: logstash
+        - group: logstash
+        - mode: 664
+        - require:
+            - pkg: logstash
+{% endfor %}
