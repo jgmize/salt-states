@@ -12,6 +12,9 @@ gevent:
 chaussette:
     pip.installed
 
+gunicorn:
+    pip.installed
+
 /etc/init/circus.conf:
     file.managed:
         - source: salt://etc/init/circus.conf.jinja
@@ -33,6 +36,7 @@ circus:
         - require:
             - pip: gevent
             - pip: chaussette
+            - pip: gunicorn
         - watch:
             - file: /etc/circus.ini
             - file: /etc/init/circus.conf
