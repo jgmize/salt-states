@@ -14,5 +14,6 @@
 {%- if 'lxc_host' in grains.get('roles', []) %}
 ethtool -K eth0 gso off
 ethtool -K eth0 gro off
+ethtool -K eth0 tso off
 {% endif %}
 exit 0
