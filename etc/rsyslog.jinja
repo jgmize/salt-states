@@ -1,4 +1,4 @@
-# For logging to elastic search, there is a specific format
+
 # of data that will get indexed into elastic search in a useful way.
 # Rsyslog doesn't have any idea what it's talking to, but the 
 # template set near the bottom of this config is pretty 
@@ -92,7 +92,7 @@ $ActionQueueSaveOnShutdown on          # save in-memory data if rsyslog shuts do
 # more fine-grained logstash parsing
 # the & ~ line ends processing by subsequent selectors
 {%- for watch in pillar.get('rsyslog', {}).get('watch_log_files', []) %}
-:syslogtag, isequal, "{{ watch['tag'] }}" @@10.0.3.32:{{ watch['port'] }}
+:syslogtag, isequal, "{{ watch['tag'] }}" @@{{rsyslog_server}}:{{ watch['port'] }}
 & ~
 {%- endfor %}
 
