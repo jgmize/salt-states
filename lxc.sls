@@ -25,6 +25,12 @@ lxc_create_{{name}}:
         - require:
             - file: bootstrap-salt.sh
 
+{% if container.get('auto', True) %}
+/etc/lxc/auto/{{name}}:
+    file.symlink:
+        - target: /var/lib/lxc/{{name}}/config
+{% endif %}
+
 {% set eth0 = container.get('eth0') %}
 {% if eth0%}
 /var/lib/lxc/{{name}}/config:
