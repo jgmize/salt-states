@@ -38,6 +38,7 @@ python-statsd:
     '/usr/local/bin/celery_task_queues.py',
     '/usr/local/bin/check_unsent_mail.sh',
     '/usr/local/bin/check_rackspace_cloudfiles.py',
+    '/usr/local/bin/check_elasticsearch.py',
     ]
 %}
 {% for bin in nagios_bin_files %}
