@@ -46,6 +46,13 @@ filter{
     pattern => ["(?m)%{MYSQLQUERYSCHEMA}(.*)?%{MYSQLQUERYEXECTIME}(.*)?%{MYSQLQUERY}"]
   }
 
+  # change query_time to a float field
+  mutate{
+    type => "mysqlslowquery"
+    exclude_tags => "_grokparsefailure"    
+    convert => ["query_time", "float"]
+  }
+
   # the date rsyslog decided to check the file is not the timestamp
   date {
     type => "mysqlslowquery"
