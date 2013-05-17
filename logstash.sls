@@ -12,6 +12,8 @@ logstash:
         - keyserver: keyserver.ubuntu.com
     pkg.installed:
         - refresh: True
+        - enable: True
+        - running: True
         - require:
             - pkgrepo: deb http://ppa.launchpad.net/wolfnet/logstash/ubuntu precise main
             - pkg: java-jre

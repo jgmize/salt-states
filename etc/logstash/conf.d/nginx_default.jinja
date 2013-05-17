@@ -41,6 +41,7 @@ filter{
       match => ["syslog_program", "nginx_access"]
       add_tag => ["nginx_custom"]
       exclude_tags => "_grokparsefailure"
+      drop => false
   }     
 
   #custom
@@ -63,12 +64,12 @@ filter{
 
 
   # the date rsyslog decided to check the file is not the timestamp
-  #date {
-  #  type => "nginx_default"
-  #  locale => "en"
-  #  exclude_tags => "_grokparsefailure"
-  #  match => [ "time_local" , "dd/MMM/YYYY:HH:mm:ss Z" ]
-  #}
+  date {
+    type => "nginx_default"
+    locale => "en"
+    exclude_tags => "_grokparsefailure"
+    match => [ "time_local" , "dd/MMM/YYYY:HH:mm:ss Z" ]
+  }
 
   # done with some fields and change message to something easy to read
   mutate {

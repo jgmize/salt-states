@@ -9,7 +9,6 @@ elasticsearch:
         - name: elasticsearch
         - running: True
         - enable: True
-        - reload: True
         - require:
             - pkg: elasticsearch
         - watch:
