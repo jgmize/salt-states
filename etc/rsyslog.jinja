@@ -9,7 +9,8 @@
 
 {%- if 'web' in roles %}
 # filter tcp connections from monitoring server
-:msg, contains,  '"-" 400 0 "-" "-"' ~
+:msg, contains,  '"-" 400 0 "-" "-"'
+& ~
 {%- endif %}
 
 
