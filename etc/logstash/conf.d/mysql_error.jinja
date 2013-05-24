@@ -13,20 +13,22 @@ input {
   }
 }
 filter {
-  # grab the message without prepended rsyslog cruft
-  # rsyslog timestamps are worthless anyway
-  grok { 
-    type => "mysql_error"
-    pattern => ".*mysql_error: %{GREEDYDATA:uncrufted}"
+  # first grok/mutate gets rsyslog information out
+  grok {
+      type => "mysql_error"
+      pattern => [ "<%{POSINT:syslog_pri}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{PROG:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" ]
+      #add_field => [ "received_at", "%{@timestamp}" ] # wrong
+      add_field => [ "received_from", "%{@source_host}" ]
   }
   mutate {
-    type => "mysql_error"
-    replace => ["@message", "%{uncrufted}"]
-    exclude_tags => "_grokparsefailure"
-    remove => ['uncrufted']
+      type => "mysql_error"
+      exclude_tags => "_grokparsefailure"
+      replace => [ "@source_host", "%{syslog_hostname}" ]
+      replace => [ "@message", "%{syslog_message}" ]
   }
+
   # mysql query logs sometimes are missing a timestamp
-  # and use skpaces instead (WTF), so merge timestampless events with the
+  # and use spaces instead, so merge timestampless events with the
   # previous event.
   multiline {
     type => "mysql_error"
