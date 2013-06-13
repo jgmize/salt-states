@@ -36,7 +36,5 @@ include:
         - require:
             - git.latest: git://github.com/jgmize/dotfiles.git
             - git.latest: git://github.com/gmarik/vundle.git
-            - pkg: vim-nox
-            - pkg: exuberant-ctags
 
 # vim:set ft=yaml:
