@@ -172,7 +172,7 @@ def update_pip(target):
     pip_install = '%s install -r %s/requirements.txt' % (
         pillar_get('consumeraffairs_pip'), pillar_get('consumeraffairs_path'))
     user = pillar_get('consumeraffairs_user')
-    return run_cmd(target, [pip_install], kwarg=kwarg={'runas': user})
+    return run_cmd(target, [pip_install], kwarg={'runas': user})
 
 
 def run_manage(target, command):
@@ -252,7 +252,7 @@ def hg_update(target, cwd=None, rev='default', user=None):
     user = user or pillar_get('consumeraffairs_user')
     return run_cmd(
         target, ['hg up %s' % rev],
-        kwarg={'runas': user, 'cwd': cwd)})
+        kwarg={'runas': user, 'cwd': cwd})
 
 
 def migrate(target):
@@ -333,7 +333,6 @@ def staging_push():
 
 
 def production_push():
-    upstream = pillar_get('consumeraffairs_upstream_servers')
     mgmt = pillar_get('consumeraffairs_mgmt')
     web_servers = pillar_get('consumeraffairs_web_servers')
     celery_servers = pillar_get('consumeraffairs_celery_servers')
