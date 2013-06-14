@@ -37,6 +37,7 @@ base:
         - nagios-nrpe
         - ntp
         - rclocal
+        - sysctl
     'roles:nagios':
         - match: grain
         - nagios
