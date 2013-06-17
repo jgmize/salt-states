@@ -46,6 +46,16 @@ mknod_tun:
             - pkg: openvpn
 {% endfor %}
 
+{% set crl = pillar.get('openvpn_crl') %}
+{% if crl %}
+/etc/openvpn/crl.pem:
+    file.managed:
+        - source: salt://etc/openvpn/crl.jinja
+        - template: jinja
+        - require:
+            - pkg: openvpn
+{% endif %}
+
 # key management is currently a manual process
 # cd /path/to/openvpn/easy-rsa/2.0
 # . vars
