@@ -19,6 +19,7 @@ base:
         - consumeraffairs_deps
         - nodejs
         - brunch
+        - mocha-phantomjs
     'roles:docsim':
         - match: grain
         - circus
