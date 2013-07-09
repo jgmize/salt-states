@@ -15,19 +15,18 @@ input {
 
 # mysql slow query log parsing
 filter{
-  # grab the message without prepended rsyslog cruft
-  # timestamps are worthless anyway
-  grok { 
-    type => "mysqlslowquery"
-    pattern => ".*mysql_slow:%{GREEDYDATA:uncrufted}"
+  # first grok/mutate gets rsyslog information out
+  grok {
+      type => "mysqlslowquery"
+      pattern => [ "<%{POSINT:syslog_pri}>%{SYSLOGTIMESTAMP:syslog_timestamp} %{SYSLOGHOST:syslog_hostname} %{PROG:syslog_program}(?:\[%{POSINT:syslog_pid}\])?: %{GREEDYDATA:syslog_message}" ]
+      #add_field => [ "received_at", "%{@timestamp}" ] # wrong
+      add_field => [ "received_from", "%{@source_host}" ]
   }
-  # if groked okay, replace the message with the uncrufted message
-  # and remove uncrufted field
   mutate {
-    type => "mysqlslowquery"
-    replace => ["@message", "%{uncrufted}"]
-    exclude_tags => "_grokparsefailure"
-    remove => ['uncrufted']
+      type => "mysqlslowquery"
+      exclude_tags => "_grokparsefailure"
+      replace => [ "@source_host", "%{syslog_hostname}" ]
+      replace => [ "@message", "%{syslog_message}" ]
   }
 
   # combine individual lines into messages

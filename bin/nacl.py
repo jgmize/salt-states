@@ -318,18 +318,30 @@ def push_web_servers(web_servers):
     clearpyc(web_servers)
 
 
-def staging_push():
-    celery_servers = pillar_get('consumeraffairs_celery_servers')
+def quick_push(revision=None):
+    'only for emergency use: skips several steps including test and migrations'
+    mgmt = pillar_get('consumeraffairs_mgmt')
+    ping_statsd(mgmt, 'event.deploy.quick.start')
     web_servers = pillar_get('consumeraffairs_web_servers')
-    primary_server = pillar_get('consumeraffairs_primary_web_server')
-    inspect_celery(celery_servers)
-    stop_celery(celery_servers)
-    push_web_servers(web_servers)
-    syncstatic(primary_server)
-    migrate(primary_server)
+    celery_servers = pillar_get('consumeraffairs_celery_servers')
+    celerybeat_server = pillar_get('consumeraffairs_celerybeat_server')
+    hg_pull(mgmt)
+    hg_heads(mgmt)
+    hg_update(mgmt)
+    clearpyc(mgmt)
+    hg_pull(web_servers)
+    hg_update(web_servers, rev=revision or 'default')
+    clearpyc(web_servers)
     restart_gunicorn(web_servers)
     restart_gunicorn_org(web_servers)
+    stop_celery(celery_servers)
     start_celery(celery_servers)
+    brunch_build(web_servers)
+    collectstatic(web_servers)
+    brunch_build(mgmt)
+    collectstatic(mgmt)
+    syncstatic(mgmt)
+    ping_statsd(mgmt, 'event.deploy.quick.complete')
 
 
 def production_push():
