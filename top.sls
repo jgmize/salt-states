@@ -22,7 +22,7 @@ base:
         - mocha-phantomjs
     'roles:docsim':
         - match: grain
-        - circus
+        - supervisor
     'roles:ftp':
         - match: grain
         - ftp
