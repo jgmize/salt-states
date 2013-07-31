@@ -1,14 +1,16 @@
 base:
     '*':
         - hosts
-        - locale
         - openvpn
-        - postfix
         - python
-        - rsyslog
         - users
         - utils
         - vcs
+    'roles:server':
+        - match: grain
+        - locale
+        - postfix
+        - rsyslog
     'roles:celery':
         - match: grain
         - celery

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import datetime
 import functools
+import json
 import logging
 import logging.handlers
 import os.path
@@ -121,6 +122,19 @@ def highstate(target, *args, **kwargs):
                 logging.info('%s', value)
         else:
             logging.info('%s', d)
+
+
+def add_role(target, role):
+    target_grains = client().cmd(target, 'grains.items')
+    for host, grains in target_grains.items():
+        roles = grains.get('roles', [])
+        if role not in roles:
+            roles.append(role)
+            result = client().cmd(
+                host, 'grains.setval', ['roles', json.dumps(roles)])
+            print result
+        else:
+            print {host: {'roles': roles}}
 
 
 @log_time('cmd.run_all')

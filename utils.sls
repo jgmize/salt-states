@@ -1,3 +1,6 @@
+include:
+    - vim
+
 utils:
     pkg.installed:
         - names:
@@ -10,9 +13,9 @@ utils:
             - lsof
             - man-db
             - screen
-            - vim-nox
             - exuberant-ctags
             - iptraf
+            - openssh-server
             - tmux
             - telnet
             - wget
