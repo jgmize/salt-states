@@ -50,7 +50,8 @@ If you're building a new salt master_::
 
 .. _master: http://docs.saltstack.com/ref/configuration/master.html
 
-You can also run the minion standalone_.
+You can also run the minion standalone_ by changing the file_client setting
+in /etc/salt/minion to local.
 
 .. _standalone:
    http://docs.saltstack.com/topics/tutorials/standalone_minion.html
