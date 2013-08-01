@@ -3,9 +3,9 @@
     {% if 'server' in pillar.get('roles', []) %}
         {% set vim_pkg_name = 'vim-nox' %}
     {% else %}
-        {% set vim_pkg_name = 'vim-gnome2' %}
+        {% set vim_pkg_name = 'vim-gnome' %}
     {% endif %}
 {% endif %}
 
-vim:
-    pkg.installed: {{vim_pkg_name}}
+{{vim_pkg_name}}:
+    pkg.installed 
