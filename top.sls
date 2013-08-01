@@ -37,8 +37,10 @@ base:
         - match: grain
         - iptables
         - lxc
-        - nagios-nrpe
         - ntp
+    'G@roles:lxc_host and G@roles:server':
+        - match: compound
+        - nagios-nrpe
         - rclocal
         - sysctl
     'roles:nagios':
