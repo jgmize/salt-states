@@ -23,6 +23,7 @@ Contents:
 
     overview
     installation
+    openvpn
 
 
 Indices and tables

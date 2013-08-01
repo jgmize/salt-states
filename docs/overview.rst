@@ -11,6 +11,7 @@ these salt states with other distributions or operating systems.
 .. _other environments:
    http://docs.saltstack.com/topics/installation/index.html#platform-specific-installation-instructions
 
+
 Linux Containers
 ----------------
 
@@ -20,6 +21,17 @@ and the containers themselves.
 
 .. _LXC: http://lxc.sourceforge.net/
 
+
+Networking
+----------
+
+We use iptables_ to forward ports from the hosts to the containers running
+the services, and for non-port forwarded services such as ssh, we use
+:doc:`openvpn`.
+
+.. _iptables: http://en.wikipedia.org/wiki/Iptables
+
+
 Database
 --------
 
@@ -27,11 +39,11 @@ We use the Percona_ fork of MySQL_, configured to use `binlog replication`_
 with nightly backups using mysqldump_ and a daily, weekly, monthly retention
 policy.
 
-
 .. _Percona: http://www.percona.com/software/percona-server
 .. _MySQL: http://www.mysql.com/
 .. _binlog replication: http://dev.mysql.com/doc/refman/5.5/en/binary-log.html
 .. _mysqldump: http://dev.mysql.com/doc/refman/5.5/en/mysqldump.html
+
 
 Web servers
 -----------
@@ -41,6 +53,7 @@ application servers.
 
 .. _nginx: http://wiki.nginx.org/Main
 .. _gunicorn: http://gunicorn.org/
+
 
 Redis
 -----
