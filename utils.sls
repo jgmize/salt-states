@@ -18,5 +18,4 @@ utils:
             - openssh-server
             - tmux
             - telnet
-            - weechat
             - wget
